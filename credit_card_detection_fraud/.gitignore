@@ -16,7 +16,6 @@ ml/data/creditcard.csv
 
 # Keep model directory but ignore large binaries if you prefer to train elsewhere
 # ml/model/
-
 # Env and IDE
 .env
 .env.local
