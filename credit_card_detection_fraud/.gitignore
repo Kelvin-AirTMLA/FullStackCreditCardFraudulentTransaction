@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Build / runtime
+.next/
+dist/
+*.pkl
+
+# Large dataset (over GitHub 100MB limit); add locally from Kaggle
+ml/data/creditcard.csv
+
+# Keep model directory but ignore large binaries if you prefer to train elsewhere
+# ml/model/
+
+# Env and IDE
+.env
+.env.local
+
+*.log
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

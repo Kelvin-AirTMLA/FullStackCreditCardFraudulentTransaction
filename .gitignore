@@ -1,0 +1,11 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+venv/
+.venv/
+# Venv created in current dir (bin, lib at root)
+bin/
+lib/
+pyvenv.cfg
+# Root-level node (if any)
+node_modules/
+.DS_Store
+node_modules
