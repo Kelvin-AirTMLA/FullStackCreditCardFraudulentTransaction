@@ -121,9 +121,23 @@ For a single-link demo, you can host all three on the same provider (e.g. Render
 
 ---
 
-## Vercel (frontend) – what I did
+## Deploy frontend to Vercel
 
-I pushed the repo to GitHub, then on [vercel.com](https://vercel.com) I imported the repo, set the root directory to **frontend** so it only builds the Next.js app, added `NEXT_PUBLIC_API_URL` with my backend’s public URL, and hit Deploy. Vercel gave me a live URL for the dashboard.
+1. **Push your project to GitHub** (if you haven’t already).
+2. **Go to [vercel.com](https://vercel.com)** and sign in (e.g. with GitHub).
+3. **Import the repo**: Click **Add New… → Project**, select your GitHub repo, then **Import**.
+4. **Set the root directory**
+  - Under **Root Directory** click **Edit**, choose **frontend**, then **Continue**.  
+  - (So Vercel builds the Next.js app, not the whole monorepo.)
+5. **Environment variable**
+  - Open **Environment Variables**.  
+  - Add: **Name** `NEXT_PUBLIC_API_URL`, **Value** = your backend’s public URL (e.g. `https://your-backend.onrender.com`).  
+  - If the backend isn’t deployed yet, use a placeholder like `https://localhost:3001` and change it later in Vercel → Project → Settings → Environment Variables.
+6. **Deploy**
+  - Click **Deploy**.  
+  - When it’s done, Vercel gives you a URL like `https://your-project.vercel.app`.
+
+**Important:** The dashboard only works end-to-end if the **Node backend** (and optionally the **Python ML API**) are also deployed and reachable at the URL you set in `NEXT_PUBLIC_API_URL`. Deploy the backend (e.g. on [Render](https://render.com) or [Railway](https://railway.app)) first, then set `NEXT_PUBLIC_API_URL` to that URL and redeploy the frontend on Vercel if needed.
 
 ## Project Structure
 
