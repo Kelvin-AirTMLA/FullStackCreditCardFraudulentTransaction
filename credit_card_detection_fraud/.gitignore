@@ -11,6 +11,10 @@ env/
 dist/
 *.pkl
 
+# Allow committing trained model artifacts for deployment demo
+!ml/model/model.pkl
+!ml/model/scaler.pkl
+
 # Large dataset (over GitHub 100MB limit); add locally from Kaggle
 ml/data/creditcard.csv
 ml/data/creditcard_full.csv
