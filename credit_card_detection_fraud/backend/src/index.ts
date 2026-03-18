@@ -8,7 +8,10 @@ import axios from "axios";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
+const ML_API_URL = (process.env.ML_API_URL || "http://localhost:8000").replace(
+  /\/+$/,
+  "",
+);
 
 // In-memory stats for predictions made through this API
 let stats = {
