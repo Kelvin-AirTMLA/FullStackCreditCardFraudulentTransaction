@@ -3,10 +3,11 @@ name: Keep ML API Alive
 on:
   schedule:
     - cron: '*/10 * * * *'  # every 10 minutes
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping backend
-        run: curl -s https://fullstackcreditcardfraudulenttransaction.onrender.com/health
+      - name: Ping ML API health
+        run: curl -fsS --max-time 10 https://fullstackcreditcardfraudulenttransaction.onrender.com/health
