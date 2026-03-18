@@ -68,7 +68,11 @@ pip install -r requirements.txt
 python train.py
 ```
 
-This creates `ml/model/model.pkl` and `ml/model/scaler.pkl`. Make sure `ml/data/creditcard.csv` exists (download the Kaggle dataset and drop it there – it’s ignored by Git because of the 100MB GitHub limit).
+This creates `ml/model/model.pkl` and `ml/model/scaler.pkl`.
+
+Dataset note:
+- This repo includes a deploy-friendly dataset: `ml/data/creditcard_small.csv` (5,000 rows, includes fraud cases).
+- The full Kaggle dataset (`creditcard.csv`) is not committed because it exceeds GitHub’s 100MB limit.
 
 ### 2. Start the Python ML API
 

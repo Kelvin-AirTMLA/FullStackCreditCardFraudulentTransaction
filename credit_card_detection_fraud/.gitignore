@@ -13,6 +13,7 @@ dist/
 
 # Large dataset (over GitHub 100MB limit); add locally from Kaggle
 ml/data/creditcard.csv
+ml/data/creditcard_full.csv
 
 # Keep model directory but ignore large binaries if you prefer to train elsewhere
 # ml/model/

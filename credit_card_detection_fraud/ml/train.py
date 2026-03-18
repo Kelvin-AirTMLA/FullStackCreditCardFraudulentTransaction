@@ -9,7 +9,10 @@ import pickle
 
 # Paths relative to this script
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(SCRIPT_DIR, "data", "creditcard.csv")
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+# Prefer a small deploy-friendly dataset committed to GitHub.
+# If the full dataset exists locally, you can swap the filename back.
+DATA_PATH = os.path.join(DATA_DIR, "creditcard_small.csv")
 MODEL_DIR = os.path.join(SCRIPT_DIR, "model")
 
 def main():

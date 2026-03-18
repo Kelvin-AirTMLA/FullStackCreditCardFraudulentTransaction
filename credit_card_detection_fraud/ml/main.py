@@ -13,7 +13,9 @@ from fastapi import FastAPI
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(SCRIPT_DIR, "model")
-DATA_PATH = os.path.join(SCRIPT_DIR, "data", "creditcard.csv")
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+# Prefer a small deploy-friendly dataset committed to GitHub.
+DATA_PATH = os.path.join(DATA_DIR, "creditcard_small.csv")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
