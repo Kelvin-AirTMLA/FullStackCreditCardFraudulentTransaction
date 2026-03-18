@@ -50,6 +50,28 @@ This is a small full‑stack prototype I built for the HOPn internship task. It 
 
 The model is trained offline via `ml/train.py`. The resulting `model.pkl` and `scaler.pkl` are loaded once by the FastAPI app at startup, so `/predict` calls are fast.
 
+## Model evaluation (metrics)
+
+Because this dataset is **highly imbalanced**, I don’t judge the model by accuracy alone. When I train the model, I look at:
+
+- **Confusion matrix** (TP / FP / FN / TN)
+- **Precision / Recall / F1-score** (especially for the fraud class)
+
+Where is the confusion matrix?
+
+- It’s printed by `ml/train.py` here:
+  - `print(confusion_matrix(y_test, y_pred))`
+
+To generate the metrics output locally:
+
+```bash
+cd credit_card_detection_fraud/ml
+source venv/bin/activate
+python train.py
+```
+
+The terminal output includes a **classification report** and the **confusion matrix** right after training.
+
 ## Prerequisites
 
 - Node.js 18+
