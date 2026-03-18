@@ -15,6 +15,7 @@ DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 DATA_PATH = os.path.join(DATA_DIR, "creditcard_small.csv")
 MODEL_DIR = os.path.join(SCRIPT_DIR, "model")
 
+
 def main():
     os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -29,7 +30,9 @@ def main():
     fraud = df[df["Class"] == 1]
 
     # Undersample majority class for balanced training
-    legit_sample = legit.sample(n=len(fraud), random_state=42) # reproduce 492 "legit" samples every run
+    legit_sample = legit.sample(
+        n=len(fraud), random_state=42
+    )  # reproduce 492 "legit" samples every run
     balanced_df = pd.concat([legit_sample, fraud]).sample(frac=1)
 
     X = balanced_df.drop("Class", axis=1)
