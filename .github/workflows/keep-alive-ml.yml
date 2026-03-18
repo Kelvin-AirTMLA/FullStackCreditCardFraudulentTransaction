@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping ML API health
-        run: curl -fsS --max-time 10 https://fullstackcreditcardfraudulenttransaction.onrender.com/health
+        run: curl -fsS -L --retry 5 --retry-all-errors --retry-delay 5 --max-time 60 https://fullstackcreditcardfraudulenttransaction.onrender.com/health
