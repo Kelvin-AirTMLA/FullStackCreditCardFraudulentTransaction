@@ -270,4 +270,25 @@ I also want to be transparent about where I got stuck, what I asked, and how I c
       - The sample prediction flow deliberately uses `df.sample(n=1)` over the **entire dataset**, not just the currently visible 500 rows, so it can pick any transaction in the file.
       - The model outputs a probability between 0 and 1, and even a normal transaction can get a small fraud probability; that’s how logistic regression works.
       - I confirmed that changing `df.sample(n=2)` would just pick 2 random rows but, since I still index `.iloc[0]`, only the first one would be used, so sticking with `n=1` is correct for a single-result UI.
+  - **Deployment debugging (Vercel + Render)**
+    - This was a stressful moment: the recruiter opened my Vercel link from his phone and the dashboard showed “Failed to load”. I opened it from my phone too and got the same error.
+    - I realized the mistake was simple: **Vercel only hosts the frontend**. If the frontend is still trying to call `localhost` (or the env var isn’t set), it will work on my laptop but it will fail for anyone else.
+    - What I did step-by-step:
+      - I deployed my **Python ML API** to Render first and tested real endpoints like `/health` and `/transactions` (I learned that opening `/` usually just shows “Not Found”).
+      - Then I deployed the **Node backend** to Render and set `ML_API_URL` so the backend can talk to the ML service.
+      - Finally, I set `NEXT_PUBLIC_API_URL` in Vercel to the public backend URL and redeployed the frontend.
+  - **Render Python version + scikit‑learn installs**
+    - Render initially tried to use Python 3.14, and my build failed (same problem I had locally on Python 3.13): scikit‑learn/numpy didn’t have an easy wheel install and it tried to compile from source.
+    - I fixed this by pinning the ML service to **Python 3.11.9** and redeploying.
+  - **Making the dataset work on Render**
+    - Because the full Kaggle dataset is >100MB, I couldn’t commit it to GitHub. That meant the ML service on Render had no `creditcard.csv` to read.
+    - To keep it simple (and still satisfy “≥ 5,000 rows”), I generated and committed a small dataset file: `creditcard_small.csv` (5,000 rows, includes all fraud cases), and changed both `ml/main.py` and `ml/train.py` to use it by default.
+  - **Why the ML service said `model_loaded:false`**
+    - At one point `/health` returned `model_loaded:false`. That meant Render was running the API but it couldn’t find `model.pkl` and `scaler.pkl`.
+    - The tricky part: my `.gitignore` was ignoring `*.pkl`, so even after I trained locally I couldn’t push the model files.
+    - I fixed it by keeping `*.pkl` ignored generally, but explicitly allowing `ml/model/model.pkl` and `ml/model/scaler.pkl`, then redeploying. After that `/health` showed `model_loaded:true`.
+  - **Backend → ML API 404 (tiny detail that broke everything)**
+    - My backend was returning 502 with details “status code 404” for `/transactions`, even though the ML API worked.
+    - The cause was embarrassingly small: I had set `ML_API_URL` with a trailing slash (`https://.../`), which made the backend call `//transactions` upstream.
+    - I fixed it by normalizing the base URL in the backend (strip trailing slashes), redeployed, and the proxy immediately worked.
 
