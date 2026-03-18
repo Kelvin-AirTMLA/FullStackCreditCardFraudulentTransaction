@@ -22,12 +22,43 @@ let stats = {
 app.use(cors());
 app.use(express.json());
 
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  attempts: number,
+  delayMs: number,
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      // Wait a bit before retrying (helps with Render cold starts)
+      if (attempt < attempts) {
+        await sleep(delayMs * attempt);
+      }
+    }
+  }
+  throw lastErr;
+}
+
 // GET /sample-transaction - get one random transaction for prediction demo
 app.get("/sample-transaction", async (_req, res) => {
   try {
-    const { data } = await axios.get(`${ML_API_URL}/sample-transaction`, {
-      timeout: 10000,
-    });
+    const data = await withRetry(
+      async () => {
+        const { data } = await axios.get(`${ML_API_URL}/sample-transaction`, {
+          timeout: 60000,
+        });
+        return data;
+      },
+      3,
+      1000,
+    );
     res.json(data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -40,10 +71,17 @@ app.get("/transactions", async (req, res) => {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : 500;
     const offset = req.query.offset ? Number(req.query.offset) : 0;
-    const { data } = await axios.get(`${ML_API_URL}/transactions`, {
-      params: { limit, offset },
-      timeout: 30000,
-    });
+    const data = await withRetry(
+      async () => {
+        const { data } = await axios.get(`${ML_API_URL}/transactions`, {
+          params: { limit, offset },
+          timeout: 60000,
+        });
+        return data;
+      },
+      3,
+      1000,
+    );
     res.json(data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -58,9 +96,16 @@ app.get("/transactions", async (req, res) => {
 // POST /predict - proxy to Python ML API and update stats
 app.post("/predict", async (req, res) => {
   try {
-    const { data } = await axios.post(`${ML_API_URL}/predict`, req.body, {
-      timeout: 10000,
-    });
+    const data = await withRetry(
+      async () => {
+        const { data } = await axios.post(`${ML_API_URL}/predict`, req.body, {
+          timeout: 60000,
+        });
+        return data;
+      },
+      3,
+      1000,
+    );
     stats.totalAnalyzed += 1;
     if (data.is_fraud) {
       stats.suspiciousCount += 1;
