@@ -9,7 +9,6 @@ from pydantic import BaseModel
 
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(SCRIPT_DIR, "model")
@@ -20,8 +19,10 @@ DATA_PATH = os.path.join(DATA_DIR, "creditcard_small.csv")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: load model and scaler once
+    # Startup: load model/scaler and also load the small CSV once.
+    # This avoids slow per-request CSV parsing on cold start.
     load_model()
+    load_data()
     yield
     # Shutdown: nothing special to clean up
 
@@ -45,6 +46,7 @@ app.add_middleware(
 # Load model and scaler at startup
 model = None
 scaler = None
+data_df = None
 
 
 # Load the model and scalar - this is essential in order for the the model to not be retrained every time
@@ -63,6 +65,13 @@ def load_model():
             scaler = pickle.load(f)
 
 
+def load_data():
+    """Load the deploy-friendly dataset once so /transactions is fast."""
+    global data_df
+    if data_df is None:
+        data_df = pd.read_csv(DATA_PATH)
+
+
 # BaseModel is a class that acts as a verifier to verify that all features are loaded and are safe(error-safe to be precise)
 # this helps the TransactionPredict class to do its job - in summary TransactionPredict inherits from this explained BaseModel subclass
 class TransactionPredict(BaseModel):
@@ -77,9 +86,10 @@ def health():
 @app.get("/sample-transaction")
 def get_sample_transaction():
     """Return one random transaction with all 30 features for prediction demo."""
-    df = pd.read_csv(DATA_PATH)
-    row = df.sample(n=1).iloc[0]
-    features = [float(row[c]) for c in df.columns if c != "Class"]
+    if data_df is None:
+        load_data()
+    row = data_df.sample(n=1).iloc[0]
+    features = [float(row[c]) for c in data_df.columns if c != "Class"]
     return {
         "features": features,
         "Amount": float(row["Amount"]),
@@ -93,13 +103,16 @@ def get_transactions(limit: int = 500, offset: int = 0):
     Uses simple offset-based paging so the UI can browse the dataset in chunks."""
     if offset < 0:
         offset = 0
+    if limit < 0:
+        limit = 0
 
-    # Skip the header row when using skiprows; start after `offset` data rows
-    skip = range(1, offset + 1)
-    df = pd.read_csv(DATA_PATH, skiprows=skip, nrows=limit)
+    # Read from the in-memory dataframe (fast, avoids CSV parsing per request)
+    if data_df is None:
+        load_data()
+    df = data_df.iloc[offset : offset + limit]
 
     records = []
-    # Use a running id that reflects the global row index (offset + local index)
+    # Use a running id that reflects the global row index.
     for idx, (_, row) in enumerate(df.iterrows()):
         records.append(
             {
